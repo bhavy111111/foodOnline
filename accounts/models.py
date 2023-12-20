@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser , BaseUserManager
+#from django.db.models.signals import post_save , pre_save
+#from django.dispatch import receiver
+from django.db.models.fields.related import ForeignKey, OneToOneField
 
 class UserManager(BaseUserManager):
     def create_user(self,first_name,last_name,username,email,password=None):
@@ -48,7 +51,7 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50 , unique=True)
     email = models.EmailField(max_length=100,unique=True)
-    phone_number=models.CharField(max_length=12,unique=True)
+    phone_number=models.CharField(max_length=12,blank=True)
 
     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICE , blank=True,null=True)
     #required fields
@@ -80,4 +83,56 @@ class User(AbstractBaseUser):
 
 
 
-    pass
+    
+class UserProfile(models.Model):
+    #when user is deleted user profile will be deleted -CASCADE
+    user = OneToOneField(User , on_delete = models.CASCADE , blank=True,null=True)
+    profile_picture = models.ImageField(upload_to='media/profile_pictures',blank=True,null=True)
+    cover_photo = models.ImageField(upload_to='media/cover_photos',blank=True,null=True)
+    address_line_1 = models.CharField(max_length = 50 , blank=True , null=True)
+    country = models.CharField(max_length=15 , blank=True , null = True)
+    state = models.CharField(max_length = 15 , blank=True,null=True)
+    city = models.CharField(max_length=15 , blank=True,null=True)
+    pincode = models.CharField(max_length=6 , blank=True,null=True)
+    latitude = models.CharField(max_length=20,blank=True,null=True)
+    longitutde =models.CharField(max_length=20,blank=True,null=True)
+    created_date = models.DateTimeField(auto_now_add = True)
+    modified_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.user.email
+'''
+#Post_Save
+#Reciver function - We basically want the recoever function to connect to sender function via signals
+@receiver(post_save,sender=User)
+def post_save_create_profile_receiver(sender , instance , created ,**kwargs):
+    #if True
+    print(created)
+    if created:
+        UserProfile.objects.create(user=instance)
+        print('userprofile is created')
+    else:
+        try:
+            profile=UserProfile.objects.get(user=instance)
+            profile.save()
+        except:
+            #Create the userprofile if not exist
+            UserProfile.objects.create(user=instance)
+            print('Profile was not exist so i created')
+
+        print('User iis updated')
+
+#post_save.connect(post_save_create_profile_receiver,sender=User)
+        
+#Lets make pre_save , which will tell which username is being saved before getting into the database
+        
+@receiver(pre_save , sender = User)
+def pre_save_profile_receiver(sender,instance,**kwargs):
+    print(instance.username , 'this username has been saved')
+'''
+
+    
+
+
+
+
