@@ -1,0 +1,10 @@
+{% autoescape off%}
+Hi {{user.first_name}},
+
+{%if is_approved %}
+Congratulation ! Your Resturant has been approved by our team.--FOODoNLINE
+{%else%}
+We are sorry! You are not eligible for publishing your food menu on our marketplace
+{%endif%}
+{% endautoescape %}
+

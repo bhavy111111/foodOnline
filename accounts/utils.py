@@ -6,6 +6,7 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage,message
 from django.conf import settings
+
 #Helper Function
 def detectUser(user):
     if user.role==1:
@@ -54,3 +55,12 @@ def send_password_reset_email(request,user):
     print('end')
     mail.send()  
 '''
+def send_notification(mail_subject,mail_template,context):
+    from_email=settings.DEFAULT_FROM_EMAIL
+    print('start')
+    #mail_subject = 'Please activate your account'
+    message = render_to_string(mail_template,context)
+    to_email = context['user'].email
+    mail = EmailMessage(mail_subject , message ,from_email, to = [to_email])
+    print('end')
+    mail.send()  

@@ -96,6 +96,7 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(upload_to='media/profile_pictures',blank=True,null=True)
     cover_photo = models.ImageField(upload_to='media/cover_photos',blank=True,null=True)
     address_line_1 = models.CharField(max_length = 50 , blank=True , null=True)
+    address_line_2 = models.CharField(max_length = 50 , blank=True , null=True)
     country = models.CharField(max_length=15 , blank=True , null = True)
     state = models.CharField(max_length = 15 , blank=True,null=True)
     city = models.CharField(max_length=15 , blank=True,null=True)
@@ -107,6 +108,9 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.email
+    
+    def full_address(self):
+        return f'{self.address_line_1},{self.address_line_1}'
 '''
 #Post_Save
 #Reciver function - We basically want the recoever function to connect to sender function via signals
