@@ -24,11 +24,11 @@ class UserProfileForm(forms.ModelForm):
     cover_photo = forms.ImageField(widget=forms.FileInput(attrs={'class':'btn btn-info'}))
     #latitude = forms.CharField()
     #Making ReadOnly Field 
-    latitude=forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
-    longitutde=forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
+    latitude =forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
+    longitude =forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
 
     class Meta:
         model=UserProfile
         #fields=['profile_picture','cover_photo','address_line_1','address_line_2','country','state','city','pincode','latitude','longitutde']
-        fields=['profile_picture','cover_photo','address','country','state','city','pincode','latitude','longitutde']
+        fields=['profile_picture','cover_photo','address','country','state','city','pincode','latitude','longitude']
 

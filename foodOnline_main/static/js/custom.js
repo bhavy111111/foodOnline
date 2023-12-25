@@ -20,7 +20,7 @@ function onPlaceChanged (){
         document.getElementById('id_address').placeholder = "Start typing...";
     }
     else{
-        // console.log('place name=>', place.name)
+         console.log('place name=>', place.name)
     }
 
     // get the address components and assign them to the fields

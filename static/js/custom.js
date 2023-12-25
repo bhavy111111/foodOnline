@@ -35,8 +35,8 @@ function onPlaceChanged (){
             var latitude = results[0].geometry.location.lat();
             var longitude = results[0].geometry.location.lng();
 
-            // console.log('lat=>', latitude);
-            // console.log('long=>', longitude);
+             console.log('lat=>', latitude);
+             console.log('long=>', longitude);
             $('#id_latitude').val(latitude);
             $('#id_longitude').val(longitude);
 
@@ -71,7 +71,7 @@ function onPlaceChanged (){
 
 }
 
-
+/*
 $(document).ready(function(){
     // add to cart
     $('.add_to_cart').on('click', function(e){
@@ -292,4 +292,6 @@ $(document).ready(function(){
     })
 
    // document ready close 
+   
 });
+*/

@@ -104,7 +104,7 @@ class UserProfile(models.Model):
     city = models.CharField(max_length=15 , blank=True,null=True)
     pincode = models.CharField(max_length=6 , blank=True,null=True)
     latitude = models.CharField(max_length=20,blank=True,null=True)
-    longitutde =models.CharField(max_length=20,blank=True,null=True)
+    longitude =models.CharField(max_length=20,blank=True,null=True)
     created_date = models.DateTimeField(auto_now_add = True)
     modified_date = models.DateTimeField(auto_now=True)
 
