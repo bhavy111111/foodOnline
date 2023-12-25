@@ -1,6 +1,6 @@
 from .models import User
 from django import forms
-
+from .models import UserProfile
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget = forms.PasswordInput())
     confirm_password = forms.CharField(widget = forms.PasswordInput())
@@ -17,3 +17,17 @@ class UserForm(forms.ModelForm):
 
         if password!=confirm_password:
             raise forms.ValidationError('Password does not match')
+
+class UserProfileForm(forms.ModelForm):
+
+    profile_picture = forms.ImageField(widget=forms.FileInput(attrs={'class':'btn btn-info'}))
+    cover_photo = forms.ImageField(widget=forms.FileInput(attrs={'class':'btn btn-info'}))
+    #latitude = forms.CharField()
+    #Making ReadOnly Field 
+    latitude=forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
+    longitutde=forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
+
+    class Meta:
+        model=UserProfile
+        fields=['profile_picture','cover_photo','address_line_1','address_line_2','country','state','city','pincode','latitude','longitutde']
+    # readonly_fields=('latitude','longitude',)
