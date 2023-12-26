@@ -5,6 +5,8 @@ from accounts.models import UserProfile
 from .models import Vendor
 from django.contrib import messages
 from menu.models import Category,FoodItem
+from menu.forms import CategoryForm
+from django.template.defaultfilters import slugify
 # Create your views here.
 
 def vprofile(request):
@@ -56,4 +58,29 @@ def food_item_by_category(request,pk=None):
         'category':category,
     }
     return render(request,'vendor/food_item_by_category.html',context)
+
+def add_category(request):
+    vendor= Vendor.objects.get(user=request.user)
+
+    print(vendor)
+    if request.method=='POST':
+        form = CategoryForm(request.POST)
+        print('Add Category Form',form)
+        if form.is_valid():
+            category_name = form.cleaned_data['category_name']
+            category = form.save(commit=False)
+            category.vendor=vendor
+            ########
+            print('Inside category.vendor',vendor)
+            ########
+            category.slug = slugify(category_name)
+            form.save()
+            messages.success(request,'Category added successfully')
+            return redirect ('menu_builder')
+    else:
+        form = CategoryForm()
+    context={
+        'form':form,
+    }
+    return render(request,'vendor/add_category.html',context)
 
