@@ -14,7 +14,10 @@ class Category(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.category_name}'
+        return self.category_name
+    
+    def clean(self):
+        self.category_name = self.category_name.capitalize()
 
 class FoodItem(models.Model):
 
@@ -31,6 +34,8 @@ class FoodItem(models.Model):
 
     def __str__(self):
         return f'{self.food_title}'
+    
+
 
 
 
