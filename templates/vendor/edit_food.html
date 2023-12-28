@@ -80,6 +80,7 @@
                                             {%endif%}
                                         {%endfor%}
                                         <button type="submit" class="btn btn-info"><i class="fa fa-plus">Update </i></button>
+                                        <a href="{% url 'delete_food' food.id%}" onclick="return confirm('Are you sure you wanna delete this')"></a>
                                     </form>
 									
 									</div>
