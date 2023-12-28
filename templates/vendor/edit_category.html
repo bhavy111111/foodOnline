@@ -18,6 +18,9 @@
 								<div class="user-holder">
 									
 									<h2 class="text-uppercase">Build Your Food Menu</h2>
+                                    <hr>
+                                    <button class="btn btn-secondary" onclick="history.back()"><i class="fa fa-angle-left" aria-hidden="true"></i>Back</button>
+									<br><br>
                                     <h6> Modify Category </h6>
 									<!-- My Restaurants Form Start -->
                                     <form action="{% url 'edit_category' category.id%}" method="POST">

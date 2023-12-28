@@ -33,7 +33,7 @@ class FoodItem(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.food_title}'
+        return self.food_title
     
 
 

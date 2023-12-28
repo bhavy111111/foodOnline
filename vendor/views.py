@@ -8,7 +8,12 @@ from menu.models import Category,FoodItem
 from menu.forms import CategoryForm
 from django.template.defaultfilters import slugify
 from django.contrib.auth.decorators import login_required
+from menu.forms import FoodItemForm
 # Create your views here.
+
+def get_vendor(request):
+    vendor = Vendor.objects.get(user=request.user)
+    return vendor
 
 def vprofile(request):
     profile=get_object_or_404(UserProfile,user=request.user)
@@ -41,8 +46,8 @@ def vprofile(request):
 @login_required(login_url='login')
 def menu_builder(request):
 
-    vendor = Vendor.objects.get(user=request.user)
-    print('Logged In',vendor)
+    vendor = get_vendor(request)
+    #print('Logged In',vendor)
     categories = Category.objects.filter(vendor=vendor).order_by('created_at')
     context={
         'vendor':vendor,
@@ -50,8 +55,9 @@ def menu_builder(request):
     }
     return render(request,'vendor/menu_builder.html',context)
 
+@login_required(login_url='login')
 def food_item_by_category(request,pk=None):
-    vendor= Vendor.objects.get(user=request.user)
+    vendor= get_vendor(request)
     category = get_object_or_404(Category,pk=pk)
     fooditems=FoodItem.objects.filter(vendor=vendor,category=category)
     print(fooditems)
@@ -61,20 +67,19 @@ def food_item_by_category(request,pk=None):
     }
     return render(request,'vendor/food_item_by_category.html',context)
 
+@login_required(login_url='login')
 def add_category(request):
-    vendor= Vendor.objects.get(user=request.user)
-
-    print(vendor)
     if request.method=='POST':
         form = CategoryForm(request.POST)
         print('Add Category Form',form)
         if form.is_valid():
             category_name = form.cleaned_data['category_name']
             category = form.save(commit=False)
-            category.vendor=vendor
-            ########
-            print('Inside category.vendor',vendor)
-            ########
+            category.vendor=get_vendor(request)
+            print('Inside',category)
+            #category.save() #here id will be generated
+            #print('save',category.save())
+
             category.slug = slugify(category_name)
             form.save()
             messages.success(request,'Category added successfully')
@@ -88,10 +93,8 @@ def add_category(request):
         'form':form,
     }
     return render(request,'vendor/add_category.html',context)
-
+@login_required(login_url='login')
 def edit_category(request,pk=None):
-    vendor= Vendor.objects.get(user=request.user)
-
     #pk --> menu_builder.html cat.id
     category = get_object_or_404(Category , pk=pk)
 
@@ -101,9 +104,9 @@ def edit_category(request,pk=None):
         if form.is_valid():
             category_name = form.cleaned_data['category_name']
             category = form.save(commit=False)
-            category.vendor=vendor
+            category.vendor=get_vendor(request)
             ########
-            print('Inside category.vendor',vendor)
+            #print('Inside category.vendor',vendor)
             ########
             category.slug = slugify(category_name)
             print('form end',form)
@@ -127,4 +130,70 @@ def delete_category(request,pk=None):
     category.delete()
     messages.success(request , 'Category updated Successfully!')
     return redirect ('menu_builder')
+
+
+def add_food(request):
+    if request.method=='POST':
+        form = FoodItemForm(request.POST,request.FILES)
+        print('Add Food Form',form)
+        if form.is_valid():
+            foodtitle = form.cleaned_data['food_title']
+            food = form.save(commit=False)
+            food.vendor=get_vendor(request)
+            ########
+            #print('Inside category.vendor',vendor)
+            ########
+            food.slug = slugify(foodtitle)
+            form.save()
+            messages.success(request,'Food added successfully')
+            return redirect ('food_item_by_category',food.category.id)
+        else:
+            #Duplicacy of category will give this error
+            print(form.errors)
+    else:
+        form = FoodItemForm()
+    context={
+        'form':form,
+    }
+    return render(request,'vendor/add_food.html',context)
+
+def edit_food(request,pk=None):
+
+    #pk --> menu_builder.html cat.id
+    food = get_object_or_404(FoodItem , pk=pk)
+
+    if request.method=='POST':
+        form = FoodItemForm(request.POST,instance=food)
+        print('Add Food Form',form)
+        if form.is_valid():
+            foodtitle = form.cleaned_data['food_title']
+            food = form.save(commit=False)
+            food.vendor=get_vendor(request)
+            ########
+            #print('Inside category.vendor',vendor)
+            ########
+            food.slug = slugify(foodtitle)
+            print('form end',form)
+            form.save()
+            messages.success(request,'Food  Update successfully')
+            return redirect ('food_item_by_category',food.category.id)
+        else:
+            #Duplicacy of category will give this error
+            print(form.errors)
+    else:
+        form =FoodItemForm(instance=food)
+    context={
+        'form':form,
+        'food':food
+    }
+    return render(request , 'vendor/edit_food.html',context)
+
+def delete_food(request,pk=None):
+    food = get_object_or_404(FoodItem ,pk=pk)
+    print(food)
+    food.delete()
+    messages.success(request, 'Food Item has been deleted ')
+    return redirect('food_item_by_category',food.category.id)
+
+
 
