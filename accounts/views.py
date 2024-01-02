@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from vendor.models import Vendor
+from django.template.defaultfilters import slugify
 # Create your views here.
 
 # Restrict the vendor from accessing customer endpoint
@@ -100,6 +101,10 @@ def registerVendor(request):
             vendor=vendor_form.save(commit=False)
             print('All vendor details',vendor)
             vendor.user = user
+            #==================vendor_slug for marketplace
+            vendors_name=vendor_form.cleaned_data['vendor_name']
+            vendor.vendor_slug = slugify(vendors_name)+'-'+str(user.id)
+            #=====================================
             user_profile = UserProfile.objects.get(user=user)
         
             vendor.user_profile = user_profile
