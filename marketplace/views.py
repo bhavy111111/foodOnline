@@ -65,4 +65,40 @@ def add_to_cart(request,food_id):
             return JsonResponse({'status': 'Failed','message':'Invalid request'})
         #return JsonResponse({'status': 'success','message':'User is Logged in'}) 
     else:
-        return JsonResponse({'status': 'Failed','message':'Please Login to continue'})
+        return JsonResponse({'status': 'login_required','message':'Please Login to continue'})
+
+def decrease_cart(request,food_id):
+    if request.user.is_authenticated:
+        # if request is ajax
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            #Check if food item exist or not
+            try:
+                fooditem=FoodItem.objects.get(id=food_id)
+                print(fooditem)
+                #Check if the user has already added same food to cart
+                try:
+                    checkcart = Cart.objects.get(user=request.user , fooditem=fooditem)
+                    
+                    if(checkcart.quantity>=1):
+                    #Decrease Cart Quantity
+                        checkcart.quantity -= 1
+                        checkcart.save()
+                    else:
+                        checkcart.delete()
+                        checkcart.quantity=0
+                    
+                    #return JsonResponse({'status': 'Success','message':'Increased Cart Quantity'})
+                    return JsonResponse({'status': 'Success','message':'Decreased Cart Quantity','cart_counter': get_cart_counter(request),'qty':checkcart.quantity})
+
+                except:
+                    
+                    return JsonResponse({'status': 'Failed','message':'You donot have the item in your cart'})
+            except:
+                return JsonResponse({'status': 'Failed','message':'This food doesnot exist'})
+
+        else:
+            #if ajax not there
+            return JsonResponse({'status': 'Failed','message':'Invalid request'})
+        #return JsonResponse({'status': 'success','message':'User is Logged in'}) 
+    else:
+        return JsonResponse({'status': 'login_required','message':'Please Login to continue'})

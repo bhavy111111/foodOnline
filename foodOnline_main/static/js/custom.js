@@ -72,6 +72,7 @@ function onPlaceChanged (){
 }
 
 $(document).ready(function(){
+    //add_to_cart
     $('.add_to_cart').on('click',function(e){
         //e.preventDefault();
         //alert('testing')
@@ -83,20 +84,31 @@ $(document).ready(function(){
         url = $(this).attr('data-url');
         //send food id to add_cart view usiing ajax
 
-        data ={
-            food_id:food_id,
-        }
+        
         $.ajax({
             type:'GET',
             url:url,
-            data:data,
+        
             success:function(response){
                 //response or function will be used in hitting marketplace views
                 //Adding logic of adding cart will be done by views.py
                 console.log(response)
+
+                if(response.status=='login_required'){
+                    //console.log(response)
+                    swal(response.message,'','info').then(function(){
+                        window.location='/login'
+                    })
+                }
+                else if(response.status=='Failed'){
+                        swal(response.message,'','error')
+                
+                }
+                else{
                 //update at cart icon
                 $('#cart_counter').html(response.cart_counter['cart_count'])
                 $('#qty-'+food_id).html(response.qty)
+                }
 
             }
         })
@@ -112,6 +124,51 @@ $(document).ready(function(){
         console.log(qty)
         $('#'+the_id).html(qty)
     })
+
+    //decrease cart
+
+    $('.decrease_cart').on('click',function(e){
+        //e.preventDefault();
+        //alert('testing')
+
+        //extract the value of food id mentioned in vendor_details.html
+        food_id = $(this).attr('data-id');
+        //alert(food_id);
+        // it will give the url of add to cart /marketplace/decrease_cart/food id/
+        url = $(this).attr('data-url');
+        //send food id to add_cart view usiing ajax
+
+        
+        $.ajax({
+            type:'GET',
+            url:url,
+            success:function(response){
+                //response or function will be used in hitting marketplace views
+                //Adding logic of adding cart will be done by views.py
+                console.log(response)
+                //update at cart icon
+                if(response.status=='login_required'){
+                    //console.log(response)
+                    swal(response.message,'','info').then(function(){
+                        window.location='/login'
+                    })
+                }
+                else if(response.status=='Failed'){
+                    swal(response.message,'','error')
+                
+
+                }
+                else{
+                    $('#cart_counter').html(response.cart_counter['cart_count'])
+                    $('#qty-'+food_id).html(response.qty)
+                }
+              
+            }
+        })
+
+    })
+
+
 });
 
 
