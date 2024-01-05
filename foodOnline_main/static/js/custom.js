@@ -108,7 +108,18 @@ $(document).ready(function(){
                 //update at cart icon
                 $('#cart_counter').html(response.cart_counter['cart_count'])
                 $('#qty-'+food_id).html(response.qty)
-                }
+                    //subtotal tax and grand_total
+
+                    applyCartAmounts(
+                        response.cart_amount['subtotal'],
+                        response.cart_amount['tax'],
+                        response.cart_amount['grand_total'],
+
+                    )
+
+                
+            
+            }
 
             }
         })
@@ -161,6 +172,13 @@ $(document).ready(function(){
                 else{
                     $('#cart_counter').html(response.cart_counter['cart_count'])
                     $('#qty-'+food_id).html(response.qty)
+                    applyCartAmounts(
+                        response.cart_amount['subtotal'],
+                        response.cart_amount['tax'],
+                        response.cart_amount['grand_total'],
+
+                    )
+                
                 }
               
             }
@@ -168,6 +186,15 @@ $(document).ready(function(){
 
     })
 
+function applyCartAmounts(subtotal,tax,grand_total){
+
+    if(window.location.pathname=='/cart/'){
+    $('#subtotal').html(subtotal)
+    $('#tax').html(tax)
+    $('#grand_total').html(grand_total)
+
+    }
+}
 
 });
 

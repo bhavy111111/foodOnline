@@ -4,7 +4,7 @@ from menu.models import Category,FoodItem
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from .models import Cart
-from .context_processors import get_cart_counter
+from .context_processors import get_cart_counter,get_cart_amount
 def marketplace(request):
     vendors=Vendor.objects.filter(is_approved=True , user__is_active=True)
     vendors_count=vendors.count()
@@ -51,12 +51,13 @@ def add_to_cart(request,food_id):
                     checkcart.quantity += 1
                     checkcart.save()
                     #return JsonResponse({'status': 'Success','message':'Increased Cart Quantity'})
-                    return JsonResponse({'status': 'Success','message':'Increased Cart Quantity','cart_counter': get_cart_counter(request),'qty':checkcart.quantity})
+                    #return JsonResponse({'status': 'Success','message':'Increased Cart Quantity','cart_counter': get_cart_counter(request),'qty':checkcart.quantity})
+                    return JsonResponse({'status': 'Success','message':'Increased Cart Quantity','cart_counter': get_cart_counter(request),'qty':checkcart.quantity,'cart_amount':get_cart_amount(request)})
 
                 except:
                     #if food is not added , we need to add food to the cart
                     checkcart = Cart.objects.create(user=request.user , fooditem=fooditem , quantity=1)
-                    return JsonResponse({'status': 'Success','message':'Added food to cart','cart_counter': get_cart_counter(request),'qty':checkcart.quantity})
+                    return JsonResponse({'status': 'Success','message':'Added food to cart','cart_counter': get_cart_counter(request),'qty':checkcart.quantity,'cart_amount':get_cart_amount(request)})
             except:
                 return JsonResponse({'status': 'Failed','message':'This food doesnot exist'})
 
@@ -102,3 +103,11 @@ def decrease_cart(request,food_id):
         #return JsonResponse({'status': 'success','message':'User is Logged in'}) 
     else:
         return JsonResponse({'status': 'login_required','message':'Please Login to continue'})
+    
+def cart(request):
+    #print('test')
+    cartitems = Cart.objects.filter(user=request.user)
+    context={
+        'cartitems':cartitems,
+    }
+    return render(request,'marketplace/cart.html',context)
