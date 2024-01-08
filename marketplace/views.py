@@ -111,3 +111,6 @@ def cart(request):
         'cartitems':cartitems,
     }
     return render(request,'marketplace/cart.html',context)
+
+def search(request):
+    return HttpResponse('Search Page')
