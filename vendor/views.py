@@ -80,8 +80,11 @@ def add_category(request):
             #category.save() #here id will be generated
             #print('save',category.save())
 
-            category.slug = slugify(category_name)
-            form.save()
+            category.save()# cat id will be generated
+           
+            category.slug = slugify(category_name)+'-'+str(category.id)
+            #category name is chicken - Slug will be chicken-{category id} as in chicken-15
+            category.save()
             messages.success(request,'Category added successfully')
             return redirect ('menu_builder')
         else:

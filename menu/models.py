@@ -6,7 +6,7 @@ class Category(models.Model):
     #if vendor is deleted particular then this category of vendor will also be deleted
     
     vendor = models.ForeignKey(Vendor , on_delete = models.CASCADE)
-    category_name = models.CharField(max_length=50,unique=True)
+    category_name = models.CharField(max_length=50)
     #Sea food -  sea-food
     slug = models.SlugField(max_length=50,unique=True)
     description = models.TextField(max_length=250 , blank=True)

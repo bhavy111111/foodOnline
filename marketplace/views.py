@@ -113,4 +113,21 @@ def cart(request):
     return render(request,'marketplace/cart.html',context)
 
 def search(request):
-    return HttpResponse('Search Page')
+    address=request.GET['address']
+    #print('Address coming from home.html',address)
+    latitude = request.GET['lat']
+    longitude = request.GET['long']
+    radius = request.GET['radius']
+    keyword=request.GET['keyword']
+
+
+    print(address,latitude,longitude,radius,keyword)
+    vendors =Vendor.objects.filter(vendor_name__icontains=keyword , is_approved=True,user__is_active=True)
+    print('Search',vendors)
+    vendors_count=vendors.count()
+    
+    context={
+        'vendors':vendors,
+        'vendors_count':vendors_count,
+    }
+    return render (request,'marketplace/listings.html',context)
