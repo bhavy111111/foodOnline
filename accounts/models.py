@@ -3,7 +3,8 @@ from django.contrib.auth.models import AbstractBaseUser , BaseUserManager
 #from django.db.models.signals import post_save , pre_save
 #from django.dispatch import receiver
 from django.db.models.fields.related import ForeignKey, OneToOneField
-
+from django.contrib.gis.db import models as gismodels
+from django.contrib.gis.geos import Point
 class UserManager(BaseUserManager):
     def create_user(self,first_name,last_name,username,email,password=None):
         if not email:
@@ -105,11 +106,22 @@ class UserProfile(models.Model):
     pincode = models.CharField(max_length=6 , blank=True,null=True)
     latitude = models.CharField(max_length=20,blank=True,null=True)
     longitude =models.CharField(max_length=20,blank=True,null=True)
+    #srid:- special reference identifier 
+    location=gismodels.PointField(blank=True,null=True,srid=4326)
     created_date = models.DateTimeField(auto_now_add = True)
     modified_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.user.email
+    
+    def save(self,*args,**kwargs):
+        if self.latitude and self.longitude:
+            #First parameter will always be longitude in Points case
+            self.location=Point(float(self.longitude),float(self.latitude))
+            return super(UserProfile,self).save(*args,**kwargs)
+        return super(UserProfile,self).save(*args,**kwargs)
+        
+
     '''
     def full_address(self):
         return f'{self.address_line_1},{self.address_line_1}'
