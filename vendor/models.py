@@ -42,5 +42,36 @@ class Vendor(models.Model):
 
             
         return super(Vendor ,self).save(*args,**kwargs)
+    
+
+DAYS=[
+    (1,('Monday')),
+    (2,('Tuesday')),
+    (3,('Wednesday')),
+    (4,('Thrusday')),
+    (5,('Friday')),
+    (6,('Saturday')),
+    (7,('Sunday')),
+]
+from datetime import time 
+
+HOUR_OF_DAY=[(time(h,m).strftime('%I:%M:%p'),time(h,m).strftime('%I:%M:%p')) for h in range(0,24) for m in (0,30)]
+
+class OpeningHour(models.Model):
+    vendor=models.ForeignKey(Vendor,on_delete=models.CASCADE)
+    day=models.IntegerField(choices=DAYS)
+    from_hour=models.CharField(choices=HOUR_OF_DAY,max_length=50,blank=True)
+    to_hour=models.CharField(choices=HOUR_OF_DAY)
+    is_closed=models.BooleanField(default=False)
+
+    
+
+    class meta:
+        ordering=('day','from_hour')
+        #if you addd same time for every day which is off , will give you error
+        unique_together=('day','from_hour','to_hour')
+    #get_field_display is inbuild method in django
+    def __str__(self):
+        return self.get_day_display()
 
 

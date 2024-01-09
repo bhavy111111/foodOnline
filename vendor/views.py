@@ -2,13 +2,18 @@ from django.shortcuts import render,get_object_or_404,redirect
 from .forms import VendorForm
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
-from .models import Vendor
+from .models import Vendor,OpeningHour
 from django.contrib import messages
 from menu.models import Category,FoodItem
 from menu.forms import CategoryForm
 from django.template.defaultfilters import slugify
 from django.contrib.auth.decorators import login_required
 from menu.forms import FoodItemForm
+from django.http import HttpResponse
+from .forms import OpeningForm
+from django.db import IntegrityError
+from django.http import JsonResponse
+
 # Create your views here.
 
 def get_vendor(request):
@@ -198,5 +203,46 @@ def delete_food(request,pk=None):
     messages.success(request, 'Food Item has been deleted ')
     return redirect('food_item_by_category',food.category.id)
 
+def opening_hours(request):
+    opening_hours=OpeningHour.objects.filter(vendor=get_vendor(request))
+    print(opening_hours)
+    form=OpeningForm()
+    context={
+        'form': form,
+        'opening_hours':opening_hours,
+
+    }
+    return render(request,'vendor/opening_hours.html',context)
+
+def opening_hours_add(request):
+    if request.user.is_authenticated:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            
+            day=request.POST.get('day')
+            from_hour=request.POST.get('from_hour')
+            to_hour=request.POST.get('to_hour')
+            is_closed=request.POST.get('is_closed')
+
+            try:
+                #return hour id or day 6- Sunday
+                hour=OpeningHour.objects.create(vendor=get_vendor(request),day=day,from_hour=from_hour,to_hour=to_hour,is_closed=is_closed)
+                #print(hour)
+                if(hour):
+                    day = OpeningHour.objects.get(id=hour.id)
+                    if day.is_closed:
+                        response={'status':'success','id':hour.id,'day':day.get_day_display(),'is_closed':'Closed'}
+                    else:
+                        response={'status':'success','id':hour.id,'day':day.get_day_display(),'from_hour':hour.from_hour,'to_hour':hour.to_hour}
+
+                #response={'status':'Success'}
+                return JsonResponse(response)
+
+            except IntegrityError as e:
+                response={'status':'Failed'}
+                return JsonResponse(response)            
+            print(day,from_hour,to_hour,is_closed)
+
+        else:
+            return HttpResponse('Invalid data')
 
 
