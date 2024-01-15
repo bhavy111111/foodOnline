@@ -137,16 +137,27 @@
                                         
                                         <div class="post-title">
                                             <h5>
-                                                <a href="listing-detail.html">{{vendor}}</a>
+                                                <a href="{% url 'vendor_detail' vendor.vendor_slug%}">{{vendor}}</a>
                                                 
                                     </div>
                                     {% if vendor.user_profile.city and vendor.user_profile.state and vendor.user_profile.pincode %}
                                         <span> {{ vendor.user_profile.city}},{{vendor.user_profile.state}},{{vendor.user_profile.pincode}}</span>
                                     {% endif %}
+
+                                    <p>{{vendor.kms}}</p>
+                                    {% if vendor.kms %}
+											<br>
+											<span><small><b>{{vendor.kms}} km </b>away</small></span>
+										{% endif %}
                                 </div>
-                            {% endfor %}
-                            </li>
+                                <div class="list-option">
+                                    <a href="javascript:void(0);" class="shortlist-btn" data-toggle="modal" data-target="#sign-in">
+                                        <i class="icon-heart-o"></i>
+                                    </a>
+                                </div>
                             
+                            </li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
