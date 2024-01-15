@@ -226,9 +226,10 @@ def opening_hours_add(request):
             try:
                 #return hour id or day 6- Sunday
                 hour=OpeningHour.objects.create(vendor=get_vendor(request),day=day,from_hour=from_hour,to_hour=to_hour,is_closed=is_closed)
-                #print(hour)
-                if(hour):
+                print('Inside creating',hour)
+                if hour:
                     day = OpeningHour.objects.get(id=hour.id)
+                    print('Inside',day)
                     if day.is_closed:
                         response={'status':'success','id':hour.id,'day':day.get_day_display(),'is_closed':'Closed'}
                     else:
@@ -238,11 +239,27 @@ def opening_hours_add(request):
                 return JsonResponse(response)
 
             except IntegrityError as e:
-                response={'status':'Failed'}
+                response={'status':'Failed','message':from_hour+'-'+to_hour+'Already exist'}
                 return JsonResponse(response)            
             print(day,from_hour,to_hour,is_closed)
 
         else:
             return HttpResponse('Invalid data')
+
+def remove_opening_hour(request,pk=None):
+    if request.user.is_authenticated:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            hour=get_object_or_404(OpeningHour,pk=pk)
+            print(hour)
+            hour.delete()
+            print('Selected Hour has been deleted')
+            return JsonResponse({'status':'success','id':pk})
+    #return JsonResponse(response)
+
+
+
+
+
+    
 
 

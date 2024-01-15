@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D  # ``D`` is a shortcut for ``Distance``
 from django.contrib.gis.db.models.functions import Distance
+from vendor.models import OpeningHour
 
 def marketplace(request):
     vendors=Vendor.objects.filter(is_approved=True , user__is_active=True)
@@ -22,13 +23,18 @@ def marketplace(request):
 def vendor_detail(request,vendor_slug):
 
     vendor = get_object_or_404(Vendor,vendor_slug = vendor_slug)
+    print('Vendor_detail',vendor.id)
+    
     categories = Category.objects.filter(vendor=vendor).prefetch_related(
         Prefetch(
             'fooditems',
             queryset = FoodItem.objects.filter(is_available=True)
         )
     )
-    
+    #############################################################
+    hour_obj = OpeningHour.objects.filter(vendor=vendor.id).order_by('day','-from_hour')
+    print('Test',hour_obj)
+    ########################
     if request.user.is_authenticated:
         cartitem  =Cart.objects.filter(user=request.user)
     else:
@@ -38,6 +44,7 @@ def vendor_detail(request,vendor_slug):
         'vendor':vendor,
         'categories':categories,
         'cartitem':cartitem,
+        'hour_obj':hour_obj,
     }
     return render(request,'marketplace/vendor_detail.html',context)
 

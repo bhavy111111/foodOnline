@@ -29,11 +29,11 @@
                             <table class="table opening_hours">
                                 <tbody>
                                     {% for hour in opening_hours %}
-                                    <tr>
+                                    <tr id ="hour-{{hour.id}}">
                                         <td><b>{{hour}}</b></td>
                                         <td><b>{{hour.from_hour}}-</b></td>
                                         <td><b>{{hour.to_hour}}</b></td>
-                                        <td><a href="#">REMOVE</a></td>
+                                        <td><a class="remove_hour" data-url="{% url 'remove_opening_hour' hour.id %}" href="#">REMOVE</a></td>
                                     </tr>
                                     {%endfor%}
                                 </tbody>

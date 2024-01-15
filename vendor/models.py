@@ -61,13 +61,13 @@ class OpeningHour(models.Model):
     vendor=models.ForeignKey(Vendor,on_delete=models.CASCADE)
     day=models.IntegerField(choices=DAYS)
     from_hour=models.CharField(choices=HOUR_OF_DAY,max_length=50,blank=True)
-    to_hour=models.CharField(choices=HOUR_OF_DAY)
+    to_hour=models.CharField(choices=HOUR_OF_DAY,blank=True,max_length=10)
     is_closed=models.BooleanField(default=False)
 
     
 
     class meta:
-        ordering=('day','from_hour')
+        ordering=('day','-from_hour')
         #if you addd same time for every day which is off , will give you error
         unique_together=('day','from_hour','to_hour')
     #get_field_display is inbuild method in django

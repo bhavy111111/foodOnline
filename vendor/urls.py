@@ -25,6 +25,10 @@ urlpatterns = [
     path('opening_hours/',views.opening_hours , name="opening_hours"),
     path('opening_hours/add/',views.opening_hours_add , name="opening_hours_add"),
 
+    #Decrease or remove Hours
+
+    path('opening_hours/remove/<int:pk>/',views.remove_opening_hour,name="remove_opening_hour"),
+
 
 
 

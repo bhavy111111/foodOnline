@@ -195,9 +195,9 @@ function applyCartAmounts(subtotal,tax,grand_total){
 
     }
 }
-
+// add opening hour
 $('.add_hour').on('click',function(e){
-    e.preventDefault()
+    //e.preventDefault()
     //alert('test')
     var day=document.getElementById('id_day').value
     var from_hour=document.getElementById('id_from_hour').value
@@ -267,6 +267,28 @@ $('.add_hour').on('click',function(e){
 
 })
 // document ready close
+
+//Remove opening hour
+$('.remove_hour').on('click',function(e){
+    e.preventDefault()   
+    url = $(this).attr('data-url');
+    //remove_id = $(this).attr('data-id');
+
+    $.ajax({
+        type:'GET',
+        url:url,
+        success: function(response){
+            //
+            if(response.status == 'success'){
+               a =  document.getElementById('hour-'+response.id)
+               //console.log(a)
+               a.remove()
+              console.log(response) 
+
+                }
+            }
+        })
+    })
 
 });
 
