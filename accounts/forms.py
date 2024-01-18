@@ -32,3 +32,8 @@ class UserProfileForm(forms.ModelForm):
         #fields=['profile_picture','cover_photo','address_line_1','address_line_2','country','state','city','pincode','latitude','longitutde']
         fields=['profile_picture','cover_photo','address','country','state','city','pincode','latitude','longitude']
 
+class UserInfoForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['first_name','last_name','phone_number']
+
