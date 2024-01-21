@@ -5,8 +5,11 @@ from .forms import OrderForm
 from .models import Order
 import simplejson as json
 from .utils import generate_order_number
+import razorpay
+from foodOnline_main.settings import RZP_KEY_ID , RZP_KEY_SECRET
 # Create your views here.
 
+client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
 def place_order(request):
     cartitems=Cart.objects.filter(user=request.user).order_by('created_at')
     cart_count=cartitems.count()
@@ -44,9 +47,30 @@ def place_order(request):
             order.save() #order.id is generated after when value hits to the database
             order.order_number = generate_order_number(order.id)
             order.save()
-            return redirect('place_order')
+            print('test1')
+            #RazorPay Payment
+            DATA={
+                "amount": float(order.total) * 100,
+                "currency": "INR",
+                "receipt": "receipt#"+order.order_number,
+                "notes": {
+                    "key1": "value3",
+                    "key2": "value2"
+                }
+            }
+            #order will be created in razorpay server
+            rzp_order = client.order.create(data=DATA)
+            rzp_order_id = rzp_order['id']
+            print(rzp_order)
 
-         
+            context={
+                'order':order,
+                'cartitems':cartitems,
+                'rzp_order_id':rzp_order_id,
+                'RZP_KEY_ID':RZP_KEY_ID,
+            }
+            return render(request,'orders/place_order.html',context)
+
         else:
             print(form.errors)
     return render(request,'orders/place_order.html')
