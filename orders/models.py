@@ -4,7 +4,6 @@ from menu.models import FoodItem
 # Create your models here.
 class Payment(models.Model):
     PAYMENT_METHOD = (
-        ('PayPal','PayPal'),
         ('RazorPay','RazorPay'),
     )
 
@@ -40,7 +39,7 @@ class Order(models.Model):
     pincode=models.CharField(max_length=10)
     total = models.FloatField()
     #tax_data will be json field - Tax is more than 1 thats y dict
-    tax_date = models.JSONField(blank=True,help_text="Data format :{'tax_type':{'tax_percentage':'tax_amount'}}")
+    tax_data = models.JSONField(blank=True,help_text="Data format :{'tax_type':{'tax_percentage':'tax_amount'}}",null=True)
     total_tax=models.FloatField()
     payment_method=models.CharField(max_length=25)
     status=models.CharField(max_length=15,choices=STATUS,default='New')
