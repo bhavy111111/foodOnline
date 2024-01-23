@@ -20,7 +20,30 @@
                                 <div class="menu-itam-holder">
                                     
                                     <div id="menu-item-list-6272" class="menu-itam-list">
-                                        
+                                    
+                                        <div class="billing-address">
+
+                                            <div>
+                                                <b> Order Name: {{order.name}}</b>
+                                            </div>
+                                            <div>
+                                                {{order.address}}
+                                            </div>
+                                            <div>
+                                                {{order.city}} -{{order.pincode}}
+                                            </div>
+                                            
+                                            <div>
+                                                {{order.state}},{{order.country}}
+                                            </div>
+                                            <div><b>Phone: </b>{{order.phone}}</div>
+                                            <div><b>Email: </b>{{order.email}}</div>
+                                            <div><b>Payment Method: </b>{{order.payment_method}}</div>
+                                            <div><a href="{%url 'checkout' %}" class="btn btn-outline-danger">EDIT</a></div>
+
+
+                                        </div>
+
                                      
 
                                      
@@ -32,6 +55,7 @@
                             
                         </div>
                     </div>
+                </div>
                 </div>
 
                     <!-- Order Section-->
@@ -46,6 +70,27 @@
                                 <div class="menu-itam-holder">
 
                                     <div >
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    {% for item in cartitems%}
+                                                    <td>
+                                                        <img src="{{item.fooditem.image.url}}" width="40" >
+                                                    </td>
+                                                    <td>
+                                                        <b>{{item.fooditem}}</b>
+                                                    </td>
+                                                    <td>
+                                                        {{item.quantity}}
+                                                    </td>
+
+                                                    <td>
+                                                        {{item.fooditem.price}}
+                                                    </td>
+                                                </tr>
+                                                {%endfor%}
+                                            </tbody>
+                                        </table>
 
                                         <ul>
                                             <li style="list-style-type:none">SubTotal
@@ -96,7 +141,26 @@
 </div>
 
 <script>
-    alert('test')
+
+
+
+    //Finalise transaction
+
+    // onApprove: function(data,actions){
+    //     return actions.order.capture().then(function(orderData){
+    //         console.log(orderData)
+    //     });
+    // }
+    //alert('test')
+
+    var grand_total = "{{ grand_total }}"
+    var url = "{% url 'payments' %}"
+    var order_number = "{{ order.order_number }}"
+
+    //Need to handle csrf token for cookie
+
+    //////////
+    const csrftoken='H47UmejeZaFAADtsdupWwXDki0EignUJ'
     //razor payment Gateway
     var options = {
         "key": "{{RZP_KEY_ID}}", // Enter the Key ID generated from the Dashboard
@@ -107,9 +171,14 @@
         "image": "{% static 'logo/foodOnlineLogo.png'%}",
         "order_id": "{{rzp_order_id}}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
         "handler": function (response){
-            alert(response.razorpay_payment_id);
-            alert(response.razorpay_order_id);
-            alert(response.razorpay_signature)
+            console.log(response.razorpay_payment_id);
+            console.log(response.razorpay_order_id);
+            console.log(response.razorpay_signature);
+            var transaction_id = response.razorpay_order_id
+            //var order_number = response.razorpay_order_id
+            var payment_method = 'RazorPay'
+            var status='Success'
+            sendTransaction(transaction_id,payment_method,status)
         },
         "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
             "name": "{{order.name}}", //your customer's name
@@ -136,6 +205,25 @@
     document.getElementById('rzp-button1').onclick = function(e){
         rzp1.open();
         e.preventDefault();
+    }
+
+    // send data to payment views to store in database
+    function sendTransaction(transaction_id , payment_method , status){
+        $.ajax({
+            type:'POST',
+            url:url,
+            data:{
+                'order_number': order_number,
+                'transaction_id':transaction_id,
+                'payment_method':payment_method,
+                'status':status,
+                'csrfmiddlewaretoken':csrftoken
+            },
+            success: function(response){
+                console.log('response==>', response)
+                window.location.href = order_complete +'?order_no='+response.order_number+'&trans_id='+response.transaction_id
+            }
+        })
     }
     </script>
 

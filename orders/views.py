@@ -7,6 +7,9 @@ import simplejson as json
 from .utils import generate_order_number
 import razorpay
 from foodOnline_main.settings import RZP_KEY_ID , RZP_KEY_SECRET
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from .models import Payment
 # Create your views here.
 
 client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
@@ -48,7 +51,7 @@ def place_order(request):
             order.order_number = generate_order_number(order.id)
             order.save()
             print('test1')
-            #RazorPay Payment
+            #RazorPay Payment - from docs of razor pay
             DATA={
                 "amount": float(order.total) * 100,
                 "currency": "INR",
@@ -61,7 +64,8 @@ def place_order(request):
             #order will be created in razorpay server
             rzp_order = client.order.create(data=DATA)
             rzp_order_id = rzp_order['id']
-            print(rzp_order)
+            #print(rzp_order)
+            
 
             context={
                 'order':order,
@@ -74,3 +78,49 @@ def place_order(request):
         else:
             print(form.errors)
     return render(request,'orders/place_order.html')
+
+
+def payments(request):
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
+        #store payment details in payment model
+        print('Test')
+        transaction_id = request.POST.get('transaction_id') 
+        print(transaction_id)
+        order_number = request.POST.get('order_number')
+        payment_method = request.POST.get('payment_method')
+        status = request.POST.get('status')
+
+        order=Order.objects.get(user=request.user , order_number=order_number)
+        print(order)
+
+        payment=Payment(
+            user=request.user,
+            transaction_id = transaction_id,
+            payment_method = payment_method,
+            amount=order.total,
+            status=status
+        )
+
+        print(payment)
+        payment.save()
+
+        
+        order.payment = payment
+        order.is_ordered = True
+        order.save()
+        
+        #MOVE THE CART ITEMS TO ORDERED FOOD MODEL
+
+
+        
+
+    return HttpResponse('Payment View')
+
+
+
+
+
+
+
+

@@ -177,3 +177,6 @@ GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo\gdal.dll
 #Razor Pay Web Integerations
 RZP_KEY_ID=config('RZP_KEY_ID')
 RZP_KEY_SECRET=config('RZP_KEY_SECRET')
+
+# To Enable Popus in Django or else it will block the payment popup
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
