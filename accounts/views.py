@@ -12,6 +12,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from vendor.models import Vendor
 from django.template.defaultfilters import slugify
+from orders.models import Order
 # Create your views here.
 
 # Restrict the vendor from accessing customer endpoint
@@ -261,7 +262,17 @@ def myaccount(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_customer)
 def customerdashboard(request):
-    return render(request , 'accounts/customerdashboard.html')
+
+    order=Order.objects.filter(user=request.user,is_ordered=True)
+    order_count = order.count()
+
+    context={
+        'order':order,
+        'order_count':order_count
+    }
+
+
+    return render(request , 'accounts/customerdashboard.html',context)
 
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)

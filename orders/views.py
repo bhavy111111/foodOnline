@@ -9,7 +9,7 @@ import razorpay
 from foodOnline_main.settings import RZP_KEY_ID , RZP_KEY_SECRET
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .models import Payment
+from .models import Payment,OrderedFood
 # Create your views here.
 
 client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
@@ -111,6 +111,32 @@ def payments(request):
         order.save()
         
         #MOVE THE CART ITEMS TO ORDERED FOOD MODEL
+
+        cart_items=Cart.objects.filter(user=request.user)
+        print(cart_items)
+        for item in cart_items:
+            ordered_food=OrderedFood()
+            ordered_food.order=order
+            ordered_food.payment=payment
+            ordered_food.user=request.user
+            ordered_food.fooditem=item.fooditem
+            ordered_food.quantity = item.quantity
+            ordered_food.price=item.fooditem.price
+            ordered_food.amount = item.fooditem.price * item.quantity #total amount
+            ordered_food.save()
+            #print(ordered_food)
+        return HttpResponse('Saved the Ordered Food')
+    
+        #SEND CONFIRMATION EMAILTO THE USER
+    
+        #SEND ORDER RECEIVED EMAIL TO VENDOR
+
+        #CLEAR THE CART IF PAYMENT IS SUCCESS
+    
+        #RETURN BACK TO AJAX IF SUCCESS OF FAILURE
+
+
+
 
 
         
