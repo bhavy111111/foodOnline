@@ -60,7 +60,10 @@ def send_notification(mail_subject,mail_template,context):
     print('start')
     #mail_subject = 'Please activate your account'
     message = render_to_string(mail_template,context)
-    to_email = context['user'].email
+
+    ##Change of script becoz of orders.views confirmation_email
+    #to_email = context['user'].email
+    to_email=context['to_email']
     mail = EmailMessage(mail_subject , message ,from_email, to = [to_email])
     print('end')
     mail.send()  

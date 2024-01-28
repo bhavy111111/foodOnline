@@ -10,6 +10,7 @@ from foodOnline_main.settings import RZP_KEY_ID , RZP_KEY_SECRET
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .models import Payment,OrderedFood
+from accounts.utils import send_notification
 # Create your views here.
 
 client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
@@ -125,15 +126,25 @@ def payments(request):
             ordered_food.amount = item.fooditem.price * item.quantity #total amount
             ordered_food.save()
             #print(ordered_food)
-        return HttpResponse('Saved the Ordered Food')
-    
+
         #SEND CONFIRMATION EMAILTO THE USER
-    
+        #coming from accounts.utils
+        mail_subject = 'Thank You for Ordering from us'
+        mail_template='orders/order_confirmation_email.html'
+        context={
+            'user':request.user,
+            'order':order,
+            'to_email':order.email
+        }
+        send_notification(mail_subject , mail_template , context)
+        return HttpResponse('Data Saved and Mail sent')
+
+        
         #SEND ORDER RECEIVED EMAIL TO VENDOR
 
         #CLEAR THE CART IF PAYMENT IS SUCCESS
     
-        #RETURN BACK TO AJAX IF SUCCESS OF FAILURE
+        #RETURN BACK TO AJAX IF SUCCESS OF FAILURE - SEND TRANSACTION FUNCTION
 
 
 
