@@ -170,18 +170,26 @@ def payments(request):
         }
         return JsonResponse(response)
     return HttpResponse('Payment View')
-
+##########GETTING ISSUE HERE#######################################3
 def order_complete(request):
     order_number = request.GET.get('order_no')
-    transaction_id = request.GET.get('transaction_id')
+    transaction_id = request.GET.get('trans_id')
     
     try:
         order=Order.objects.get(order_number=order_number, payment__transaction_id=transaction_id,is_ordered=True)
         ordered_food = OrderedFood.objects.filter(order=order)
 
+        subtotal=0
+
+        for items in ordered_food:
+            subtotal +=(items.price * items.quantity)
+
+        #tax_data = json.loads(order.tax_data)
+        #print(tax_data)
         context={
             'order':order,
             'ordered_food':ordered_food,
+            'subtotal':subtotal,
         }
 
         return render(request,'orders/order_complete.html',context)
