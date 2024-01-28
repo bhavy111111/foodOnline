@@ -8,9 +8,10 @@ from .utils import generate_order_number
 import razorpay
 from foodOnline_main.settings import RZP_KEY_ID , RZP_KEY_SECRET
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from .models import Payment,OrderedFood
 from accounts.utils import send_notification
+from vendor.models import Vendor
 # Create your views here.
 
 client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
@@ -137,22 +138,57 @@ def payments(request):
             'to_email':order.email
         }
         send_notification(mail_subject , mail_template , context)
-        return HttpResponse('Data Saved and Mail sent')
+        
 
         
         #SEND ORDER RECEIVED EMAIL TO VENDOR
 
+        mail_subject='You have received a new order'
+        mail_template='orders/new_order_received.html'
+        #Multiple email address to be passed in list
+        to_emails=[]
+        for i in cart_items:
+            if i.fooditem.vendor.user.email  not in to_emails:
+                to_emails.append(i.fooditem.vendor.user.email)
+        print('Test environmeny',to_emails)
+        context={
+            'order':order,
+            'to_email':to_emails,
+        }
+
+
+        send_notification(mail_subject,mail_template,context)
+
         #CLEAR THE CART IF PAYMENT IS SUCCESS
+        cart_items.delete()
+        #return HttpResponse('Data Saved and Mail sent')
     
         #RETURN BACK TO AJAX IF SUCCESS OF FAILURE - SEND TRANSACTION FUNCTION
-
-
-
-
-
-        
-
+        response={
+            'order_number':order_number,
+            'transaction_id':transaction_id,
+        }
+        return JsonResponse(response)
     return HttpResponse('Payment View')
+
+def order_complete(request):
+    order_number = request.GET.get('order_no')
+    transaction_id = request.GET.get('transaction_id')
+    
+    try:
+        order=Order.objects.get(order_number=order_number, payment__transaction_id=transaction_id,is_ordered=True)
+        ordered_food = OrderedFood.objects.filter(order=order)
+
+        context={
+            'order':order,
+            'ordered_food':ordered_food,
+        }
+
+        return render(request,'orders/order_complete.html',context)
+    except:
+        return redirect('home')
+   
+
 
 
 
