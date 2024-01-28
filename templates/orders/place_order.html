@@ -141,30 +141,33 @@
 </div>
 
 <script>
-
-
-
-    //Finalise transaction
-
-    // onApprove: function(data,actions){
-    //     return actions.order.capture().then(function(orderData){
-    //         console.log(orderData)
-    //     });
-    // }
-    //alert('test')
-
-    var grand_total = "{{ grand_total }}"
-    var url = "{% url 'payments' %}"
-    var order_number = "{{ order.order_number }}"
-
     //Need to handle csrf token for cookie
     function getCookie(name){
-        
+    let cookieValue=null
+    if(document.cookie && document.cookie!=''){
+        const cookies=document.cookie.split(';')
+        for( let i=0; i < cookies.length;i++){
+            const cookie=cookies[i].trim();
+            console.log(cookie)
+            //Does this cookie string begin with the name we want?
+           if(cookie.substring(0,name.length+1)==(name+'=')){
+            cookieValue = decodeURIComponent(cookie.substring(name.length+1))
+            break;
+           } 
+
+        }
+
+    }
+        return cookieValue
     }
 
 
     //////////
-    const csrftoken='lWvfB0TNun8QjNmpvSXJyxqLeyBxFbBO'
+    var grand_total = "{{ grand_total }}"
+    var url = "{% url 'payments' %}"
+    var order_number = "{{ order.order_number }}"
+    var csrftoken=getCookie('csrftoken')
+    console.log('csrf_token-->',csrftoken)
     //razor payment Gateway
     var options = {
         "key": "{{RZP_KEY_ID}}", // Enter the Key ID generated from the Dashboard
