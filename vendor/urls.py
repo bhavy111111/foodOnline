@@ -29,6 +29,9 @@ urlpatterns = [
 
     path('opening_hours/remove/<int:pk>/',views.remove_opening_hour,name="remove_opening_hour"),
 
+    path('order_detail/<int:order_number>/',views.order_detail,name="order_detail"),
+
+
 
 
 

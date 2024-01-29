@@ -12,14 +12,31 @@ from django.http import HttpResponse,JsonResponse
 from .models import Payment,OrderedFood
 from accounts.utils import send_notification
 from vendor.models import Vendor
+from menu.models import FoodItem
 # Create your views here.
 
 client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
 def place_order(request):
-    cartitems=Cart.objects.filter(user=request.user).order_by('created_at')
+    cartitems=Cart.objects.filter(user=request.user).order_by('-created_at')
     cart_count=cartitems.count()
     if cart_count<=0:
         return redirect('marketplace')
+    
+    #Getting Unique Vendors Ids
+    vendors_ids =[] 
+    for i in cartitems:
+        if i.fooditem.vendor.id not in vendors_ids:
+            vendors_ids.append(i.fooditem.vendor.id)
+
+    #{'vendor_id':{'subtotal':{'tax_type':{'tax_percentage':'tax_amount'}}}}        
+    subtotal=0
+
+    for i in cartitems:
+        fooditem = FoodItem.objects.get(pk=i.fooditem.id , vendor_id__in=vendors_ids)
+        print(fooditem,fooditem.vendor.id)
+        subtotal+=(fooditem.price * i.quantity )
+        print(subtotal)
+    #print(vendors_ids)
     
     subtotal=get_cart_amount(request)['subtotal']
     total_tax=get_cart_amount(request)['tax']
@@ -48,9 +65,12 @@ def place_order(request):
             order.total_tax = total_tax
             order.payment_method='RazorPay'
             
+            
             #print('Results previous before going to db',order)
             order.save() #order.id is generated after when value hits to the database
             order.order_number = generate_order_number(order.id)
+            #Many to Many Relationship of vendor attribute in order model
+            order.vendor.add(*vendors_ids)
             order.save()
             print('test1')
             #RazorPay Payment - from docs of razor pay

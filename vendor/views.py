@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from .forms import OpeningForm
 from django.db import IntegrityError
 from django.http import JsonResponse
+from orders.models import Order,OrderedFood
 
 # Create your views here.
 
@@ -255,6 +256,21 @@ def remove_opening_hour(request,pk=None):
             print('Selected Hour has been deleted')
             return JsonResponse({'status':'success','id':pk})
     #return JsonResponse(response)
+
+def order_detail(request,order_number=None):
+    try:
+        order=Order.objects.get(order_number=order_number,is_ordered=True)
+        print(order)
+        ordered_food=OrderedFood.objects.filter(order=order,fooditem__vendor=get_vendor(request))
+        print('ORDERED FOOD',ordered_food)
+
+        context={
+            'order':order,
+            'ordered_food':ordered_food,
+        }
+    except:
+        return redirect('vendor')
+    return render(request,'vendor/order_detail.html',context)
 
 
 

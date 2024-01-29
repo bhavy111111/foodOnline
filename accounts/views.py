@@ -277,11 +277,14 @@ def customerdashboard(request):
 @login_required(login_url='login')
 @user_passes_test(check_role_vendor)
 def vendordashboard(request):
-    # Using customer context processor , no need for these two lines
-    #vendor = Vendor.objects.get(user=request.user)
-   
-    #print('Inside Vendor dashboard views',vendor)
-    #context={
-     #   'vendor':vendor,
-    #}
-    return render(request , 'accounts/vendordashboard.html')
+
+    vendor = Vendor.objects.get(user=request.user)
+    print('Vendor DETAILS ',vendor)
+    orders=Order.objects.filter(vendor__in=[vendor.id],is_ordered=True).order_by('-created_at')
+    print(orders)
+    orders_count=orders.count()
+    context={
+        'orders':orders,
+        'orders_count':orders_count,
+    }
+    return render(request , 'accounts/vendordashboard.html',context)

@@ -4,6 +4,7 @@ from accounts.models import User,UserProfile
 from accounts.forms import UserProfileForm,UserInfoForm
 from django.contrib import messages
 from orders.models import Order,OrderedFood
+import simplejson as json
 # Create your views here.
 @login_required(login_url='login')
 def cprofile(request):
@@ -38,7 +39,7 @@ def cprofile(request):
     return render(request ,'customers/cprofile.html',context)
 
 def my_orders(request):
-    order=Order.objects.filter(user=request.user,is_ordered=True)
+    order=Order.objects.filter(user=request.user,is_ordered=True)[:5]
     #print(order)
 
     context={
@@ -52,10 +53,16 @@ def order_details(request,order_number):
         print(order)
         #print(order)
         ordered_food=OrderedFood.objects.filter(order=order)
-        print(ordered_food)
+        #print(ordered_food)
+        subtotal=0
+        for items in ordered_food:
+            subtotal+=(items.price * items.quantity)
+        #tax_data = json.loads(order.tax_data)
+        #print(tax_data)
         context={
             'order':order,
-            'ordered_food':ordered_food
+            'ordered_food':ordered_food,
+            'subtotal':subtotal,
         }
 
         return render(request,'customers/order_details.html',context)
