@@ -2,7 +2,10 @@ from django.db import models
 from accounts.models import User
 from menu.models import FoodItem
 from vendor.models import Vendor
+import simplejson as json
 # Create your models here.
+
+request_object=''
 class Payment(models.Model):
     PAYMENT_METHOD = (
         ('RazorPay','RazorPay'),
@@ -60,6 +63,50 @@ class Order(models.Model):
     
     def order_placed_to(self):
         return ",".join([str(i) for i in self.vendor.all()])
+    
+    def get_total_by_vendor(self):
+        vendor=Vendor.objects.get(user=request_object.user)
+        subtotal = 0
+        tax=0
+        tax_dict={}
+        if self.total_data:
+            total_data = json.loads(self.total_data)
+            data = total_data.get(str(vendor.id))
+            print('data inside',data)
+            #print(data)
+
+           
+            for key,val in data.items():
+                subtotal+=float(key)
+                #val=val.replace("'",'"')
+                val=json.loads(val)
+                
+                tax_dict.update(val)
+
+                #calculate tax for vendor dashboard
+
+                for i in val:
+                    for j in val[i]:
+                        tax+=float(val[i][j])
+        grand_total = float(subtotal)+ float(tax)
+        print('tax_dict',tax_dict)
+        print('subtotal',subtotal)
+        print('tax',tax)
+        print('grand_total',grand_total)
+
+        context={
+            'grand_total':grand_total,
+        }
+
+        
+        #a = vendor.id
+        # if self.total_data:
+        #     print('Models Test',self.total_data)
+        #     #total_data=json.dumps(self.total_data)
+        #     data=self.total_data.get(8)
+        #     print(data)
+        #     #print(total_data)
+        return vendor
     
     def __str__(self):
         return self.order_number

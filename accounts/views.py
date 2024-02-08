@@ -283,8 +283,10 @@ def vendordashboard(request):
     orders=Order.objects.filter(vendor__in=[vendor.id],is_ordered=True).order_by('-created_at')
     print(orders)
     orders_count=orders.count()
+    recent_orders=orders[:10]
     context={
         'orders':orders,
         'orders_count':orders_count,
+        'recent_orders':recent_orders,
     }
     return render(request , 'accounts/vendordashboard.html',context)
