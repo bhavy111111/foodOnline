@@ -13,6 +13,7 @@ from .models import Payment,OrderedFood
 from accounts.utils import send_notification
 from vendor.models import Vendor
 from menu.models import FoodItem
+from marketplace.models import Tax
 # Create your views here.
 
 client = razorpay.Client(auth=(RZP_KEY_ID,RZP_KEY_SECRET))
@@ -27,22 +28,54 @@ def place_order(request):
     for i in cartitems:
         if i.fooditem.vendor.id not in vendors_ids:
             vendors_ids.append(i.fooditem.vendor.id)
+    ##########################################################
+            
+    #Below idea :- To get subtotal for each vendor
+
+    #####################################################33
+
+
 
     #{'vendor_id':{'subtotal':{'tax_type':{'tax_percentage':'tax_amount'}}}}        
     subtotal=0
-
+    k={}
+    get_tax = Tax.objects.filter(is_active=True)
+    total_data={}
     for i in cartitems:
         fooditem = FoodItem.objects.get(pk=i.fooditem.id , vendor_id__in=vendors_ids)
-        print(fooditem,fooditem.vendor.id)
-        subtotal+=(fooditem.price * i.quantity )
-        print(subtotal)
+        #print(fooditem,fooditem.vendor.id)
+        v_id = fooditem.vendor.id
+        if v_id in k:
+            subtotal=k[v_id]
+            subtotal+=(fooditem.price * i.quantity )
+            k[v_id]=subtotal
+        else:
+            subtotal=(fooditem.price * i.quantity )
+            k[v_id] = subtotal
+
+        #calculate tax data
+    #print(k)
+        tax_dict={}
+        for i in get_tax:
+            tax_type=i.tax_type
+            #print('tex_type',tax_type)
+            tax_percentage=i.tax_percentage
+            tax_amount=round((tax_percentage * subtotal)/100,2)
+            #print('List',tax_type,tax_percentage,tax_amount)
+            tax_dict.update({tax_type: {str(tax_percentage):tax_amount}})
+            #print('Dict',tax_dict)
+        #construct total data
+        total_data.update({fooditem.vendor.id:{str(subtotal):str(tax_dict)}})
+    print(total_data)
+
+    
     #print(vendors_ids)
     
     subtotal=get_cart_amount(request)['subtotal']
     total_tax=get_cart_amount(request)['tax']
     grand_total=get_cart_amount(request)['grand_total']
     tax_data=get_cart_amount(request)['tax_dict']
-    print(tax_data)
+    #print(tax_data)
     #print(subtotal,total_tax,grand_total,tax_data)
 
     #Updating the value which we are getting placeorder
@@ -61,7 +94,8 @@ def place_order(request):
             order.pincode = form.cleaned_data['pincode']
             order.user = request.user
             order.total = grand_total
-            order.tax_date = json.dumps(tax_data)
+            order.tax_data = json.dumps(tax_data)
+            order.total_data=json.dumps(total_data)
             order.total_tax = total_tax
             order.payment_method='RazorPay'
             
@@ -72,7 +106,7 @@ def place_order(request):
             #Many to Many Relationship of vendor attribute in order model
             order.vendor.add(*vendors_ids)
             order.save()
-            print('test1')
+            #print('test1')
             #RazorPay Payment - from docs of razor pay
             DATA={
                 "amount": float(order.total) * 100,
